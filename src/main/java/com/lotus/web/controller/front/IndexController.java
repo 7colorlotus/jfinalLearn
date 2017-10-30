@@ -1,6 +1,7 @@
 package com.lotus.web.controller.front;
 
 import com.jfinal.core.Controller;
+import com.jfinal.json.Json;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
@@ -43,6 +44,7 @@ public class IndexController extends Controller {
 
     /**
      * 测试数据库操作
+     *  Db + Record  模式
      */
     public void testDb() {
         new User().set("name", "Lotus").set("age", 29).save();
@@ -66,6 +68,8 @@ public class IndexController extends Controller {
             System.out.println("tempName:" + tempName + ",tempAge:" + tempAge);
         }
 
+
+        //编程事务
         boolean succeed = Db.tx(new IAtom() {
             public boolean run() throws SQLException {
                 int count = Db.update("update user set name=? where id=?", "Jacky", 3);
@@ -77,4 +81,33 @@ public class IndexController extends Controller {
 
         renderText("testDb success!!");
     }
+
+    /**
+     * 测试查询数据库分页
+     */
+    public void testDbPaginate(){
+        User dao = new User();
+        //普通分页查询
+        Page<User> users =  dao.paginate(1,10,"select *", "from user where age > ?",18);
+
+        //带有group by 的分页查询
+        users =  dao.paginate(1,10,true,"select *", "from user where age > ? group by age",18);
+
+        //带有统计总数 的分页查询
+
+        String from = "from user where age > ? ";
+        String totalRowSql = "select count(*) " + from;
+        String findSql = "select * " + from + " order by age";
+
+        users =  dao.paginateByFullSql(1,10,totalRowSql, findSql,18);
+
+        renderText("pageNum: " + users.getPageNumber()
+                +",pageSize: " + users.getPageSize()
+                +",pageValue: " + Json.getJson().toJson(users.getList())
+                +",pageValueSize: " + users.getList().size()
+                +",totalRow: " + users.getTotalRow()
+        );
+
+    }
+
 }
