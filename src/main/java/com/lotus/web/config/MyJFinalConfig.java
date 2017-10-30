@@ -2,6 +2,7 @@ package com.lotus.web.config;
 
 import com.jfinal.config.*;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
+import com.jfinal.plugin.activerecord.tx.TxByActionKeyRegex;
 import com.jfinal.plugin.druid.DruidPlugin;
 import com.jfinal.template.Engine;
 import com.lotus.entitiy.User;
@@ -42,6 +43,7 @@ public class MyJFinalConfig extends JFinalConfig {
     }
 
     public void configInterceptor(Interceptors me) {
+        me.add(new TxByActionKeyRegex("/testDeclareTx"));
         me.add(new AuthInterceptor());
     }
 

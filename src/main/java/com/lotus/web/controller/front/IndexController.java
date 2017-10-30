@@ -1,5 +1,6 @@
 package com.lotus.web.controller.front;
 
+import com.jfinal.aop.Before;
 import com.jfinal.core.Controller;
 import com.jfinal.json.Json;
 import com.jfinal.log.Log;
@@ -7,6 +8,7 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.lotus.entitiy.User;
 
 import java.sql.SQLException;
@@ -108,6 +110,22 @@ public class IndexController extends Controller {
                 +",totalRow: " + users.getTotalRow()
         );
 
+    }
+
+    /**
+     * 测试声明式事务
+     */
+//    @Before(Tx.class)
+    public void testDeclareTx(){
+        Integer transAmt = getParaToInt("transAmt");
+        Integer fromUserId = getParaToInt("fromUserId");
+        Integer toUserId = getParaToInt("toUserId");
+
+        Db.update("update user set cash = cash - ? where id = ?", transAmt, fromUserId);
+        System.out.println(1/0);
+        Db.update("update user set cash = cash + ? where id = ?", transAmt, toUserId);
+
+        renderText("testDeclareTx success");
     }
 
 }
